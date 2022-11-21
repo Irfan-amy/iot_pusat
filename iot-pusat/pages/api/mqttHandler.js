@@ -56,8 +56,6 @@ export default async function handler(req, res) {
         path: path,
       };
       var hasError = false;
-      console.log("Host : ", host);
-      console.log("Options : ", options);
       const mqttClient = mqtt.connect(host, options);
       mqttClient.stream.on("error", (err) => {
         console.log("error", err);

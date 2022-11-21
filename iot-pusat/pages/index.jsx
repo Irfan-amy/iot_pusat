@@ -1,3 +1,4 @@
+
 import Head from "next/head";
 import React, { use, useEffect, useState } from "react";
 import { HiMenuAlt3 } from "react-icons/hi";
@@ -79,61 +80,6 @@ const Home = () => {
     });
   };
 
-  const test = () => {
-    // const client = lotest[lotest.length - 1];
-    // client.end();
-
-    fetch("http://localhost:3000/test", {
-      method: "GET",
-      headers: {
-        "Content-type": "application/json",
-      },
-    }).then((result) => {
-      console.log(result);
-    });
-  };
-
-  // const subscribe = () => {
-  //   var mqttUri = host;
-  //   const options = {
-  //     username: username,
-  //     password: password,
-  //     clientId: clientId,
-  //     reconnectPeriod: 2000,
-  //     connectTimeout: 5000,
-  //     keepAlive: 60,
-  //     port: 8000,
-  //     path: "/mqtt",
-  //   };
-  //   const client = mqtt.connect("mqtt://broker.hivemq.com", options);
-  //   client.on("connect", function () {
-  //     client.subscribe(topic, function (err) {
-  //       if (!err) {
-  //         client.publish("presence", "Hello mqtt");
-  //       }
-  //     });
-  //   });
-
-  //   lotest.push(client);
-  //   client;
-  //   // // access client vis clientRef.current
-  //   // const client = mqtt.connect(mqttUri, options);
-
-  //   // return () => {
-  //   //   // always clean up the effect if clientRef.current has a value
-  //   //   if (clientRef.current) {
-  //   //     clientRef.current.unsubscribe('test');
-  //   //     clientRef.current.end(clientRef.current);
-  //   //   }
-  //   // };
-
-  //   console.log(host);
-  //   console.log(port);
-  //   console.log(username);
-  //   console.log(password);
-  //   console.log(clientId);
-  //   console.log(topic);
-  // };
   async function onPressedLoginBtn() {
     var result = await fetch("http://localhost:3000/api/registerUser", {
       method: "POST",
@@ -186,14 +132,6 @@ const Home = () => {
       port: parseInt(port),
       path: "/mqtt",
     };
-    // fetch("http://localhost:3000/api/test", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-type": "application/json",
-    //   },
-    // }).then((result) => {
-    //   console.log(result);
-    // });
     console.log(data);
     var result = await fetch("http://localhost:3000/api/connectClient", {
       method: "POST",
@@ -202,37 +140,16 @@ const Home = () => {
       },
       body: JSON.stringify(data),
     });
-    console.log("SUCESSS!!!");
-
-    // const client = mqtt.connect(mqttUri, options).on("error", function (err) {
-    //   console.log(err);
-    // });
-    // client.on("error", function (err) {
-    //   console.log(err);
-    // });
-    // client.on("connect", function () {
-    //   client.subscribe("iot-pusat", function (err) {
-    //     if (!err) {
-    //       client.publish("iot-pusat", "Hello mqtt");
-    //       fetch("http://localhost:3000/test", {
-    //         method: "POST",
-    //         headers: {
-    //           "Content-type": "application/json",
-    //         },
-    //         body: JSON.stringify(options),
-    //       }).then((result) => {
-    //         console.log(result);
-    //       });
-    //       console.log(options);
-    //     }
-    //   });
-    // });
-
-    // client.on("message", function (topic, message) {
-    //   // message is Buffer
-    //   console.log(message.toString());
-    //   // client.end();
-    // });
+    if (result.status == 200 || result.status == 201) {
+    const {client} = await result.json();
+    console.log(client);
+    setHasClient(true);
+        setHost(client.host);
+        setPort(client.port);
+        setClientId(client.clientId);
+    _client = client;
+    socket.emit("registerClient", client._id);
+    }
   }
 
   async function onPressedSubscribeBtn() {
@@ -253,7 +170,11 @@ const Home = () => {
   }
 
   return (
+    
     <section className="flex gap-0">
+      <link rel="preconnect" href="https://fonts.googleapis.com "/>
+<link rel="preconnect" href="https://fonts.gstatic.com"  />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400&display=swap" rel="stylesheet"></link>
       <div
         className={`bg-[#0E1D24] min-h-screen ${
           open ? "w-72" : "w-16"

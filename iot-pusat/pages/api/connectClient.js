@@ -6,14 +6,27 @@ import { v4 as uuidv4 } from "uuid";
 dbConnect();
 
 export default async function handler(req, res) {
-  console.log("done");
+  
   const { method } = req;
 
   switch (method) {
     case "POST":
       try {
+
+        const {
+          host,
+          username,
+          password,
+          clientId,
+          reconnectPeriod,
+          connectTimeout,
+          port,
+          path,
+        } = req.body;
+  
+
         console.log(req.body.user);
-        const client = await Client.findOne({ user: req.body.user });
+        var client = await Client.findOne({ user: req.body.user });
         console.log("connectClient", JSON.stringify(req.body));
         if (!client) {
           req.body._id = uuidv4().toString();
@@ -26,11 +39,21 @@ export default async function handler(req, res) {
             body: JSON.stringify(req.body),
           });
           if (result.status == 201) {
-            console.log(req.body.user);
-            const client = await Client.create(req.body);
-            console.log(client);
-            res.status(201).json({ success: true });
+            client = await Client.create({
+              _id:req.body._id,
+              host:host,
+              username:username,
+              password:password,
+              clientId:clientId,
+              reconnectPeriod:reconnectPeriod,
+              connectTimeout: connectTimeout,
+              port: port,
+              path: path,});
+            console.log("createClient");
+            res.status(201).json({ success: true, client:client});
           } else {
+            console.log("Why?");
+          console.log
             res.status(400).json({ success: false });
           }
         } else {
