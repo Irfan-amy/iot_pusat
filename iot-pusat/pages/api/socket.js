@@ -28,6 +28,16 @@ export default function SocketHandler(req, res) {
       console.log("world");
     });
 
+    socket.on("disconnecting", (msg)=>{
+      console.log(socket.id);
+      for (var i = 0; i < socketList.length; i++) {
+        if (socketList[i].socket.id == socket.id) {
+          socketList.splice(i, 1);
+        }
+      }
+    });
+
+
     socket.on("updateClientData", async (message, callback) => {
       console.log("updateClientData", message.clientId);
       for (var i = 0; i < socketList.length; i++) {

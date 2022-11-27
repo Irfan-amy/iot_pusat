@@ -38,6 +38,7 @@ export default async function handler(req, res) {
           if (result.status == 201) {
             client = await Client.create({
               _id: req.body._id,
+              user: req.body.user,
               host: host,
               username: username,
               password: password,

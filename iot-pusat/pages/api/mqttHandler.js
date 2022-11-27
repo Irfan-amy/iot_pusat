@@ -148,6 +148,8 @@ export default async function handler(req, res) {
                 clientId: client._id,
                 topic: topic,
               });
+
+            console.log('socket: ', socket);
             await ClientData.create({
               _id: uuidv4().toString(),
               clientId: client._id,
