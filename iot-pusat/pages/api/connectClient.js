@@ -35,6 +35,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify(req.body),
           });
+
           if (result.status == 201) {
             client = await Client.create({
               _id: req.body._id,
@@ -49,6 +50,7 @@ export default async function handler(req, res) {
               path: path,
             });
             console.log("createClient");
+
             res.status(201).json({ success: true, client: client });
           } else {
             res.status(400).json({ success: false });

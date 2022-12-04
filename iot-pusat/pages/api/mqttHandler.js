@@ -142,14 +142,11 @@ export default async function handler(req, res) {
             mqttClient.subscribe(element);
           });
           mqttClient.on("message", async function (topic, message) {
-            console.log(message.toString());
             if (socket)
               socket.emit("updateClientData", {
                 clientId: client._id,
                 topic: topic,
               });
-
-            console.log('socket: ', socket);
             await ClientData.create({
               _id: uuidv4().toString(),
               clientId: client._id,

@@ -1,4 +1,3 @@
-
 import Head from "next/head";
 import React, { use, useEffect, useState } from "react";
 import { HiMenuAlt3 } from "react-icons/hi";
@@ -19,14 +18,51 @@ import Client from "../models/client";
 import moment from "moment";
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
-
+import LineChart from "../components/LineChart";
 import io from "socket.io-client";
+
+import dynamic from "next/dynamic";
+const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
+
+const UserData = [
+  {
+    id: 1,
+    year: 2016,
+    userGain: 80000,
+    userLost: 823,
+  },
+  {
+    id: 2,
+    year: 2017,
+    userGain: 45677,
+    userLost: 345,
+  },
+  {
+    id: 3,
+    year: 2018,
+    userGain: 78888,
+    userLost: 555,
+  },
+  {
+    id: 4,
+    year: 2019,
+    userGain: 90000,
+    userLost: 4555,
+  },
+  {
+    id: 5,
+    year: 2020,
+    userGain: 4300,
+    userLost: 234,
+  },
+];
 
 var user;
 var _client;
 let socket;
 let socketId;
 const Home = () => {
+  const [graphData, setGraphData] = useState({});
   const menus = [
     { name: "Dashboard", link: "/", icon: MdOutlineDashboard },
     { name: "User", link: "/", icon: AiOutlineUser },
@@ -75,7 +111,13 @@ const Home = () => {
       socketId = socket.id;
       socket.on("updateClientData", (data) => {
         setMessages(data);
-        console.log(messages);
+        setGraphData({
+          x: data.map((e) => e.date),
+          y: data.map((e) => e.value),
+          type: "scatter",
+          mode: "lines+markers",
+          marker: { color: "red" },
+        });
       });
     });
   };
@@ -107,14 +149,57 @@ const Home = () => {
       });
       if (resultClient.status == 200 || resultClient.status == 201) {
         const { client } = await resultClient.json();
-        console.log("test:", client);
         setHasClient(true);
         setHost(client.host);
         setPort(client.port);
         setClientId(client.clientId);
+        setSubscriptions(client.subscription);
         _client = client;
 
         socket.emit("registerClient", client._id);
+
+        var resultClient = await fetch(
+          "http://localhost:3000/api/getClientData",
+          {
+            method: "POST",
+            headers: {
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify({
+              user: user,
+            }),
+          }
+        );
+        if (resultClient.status == 200 || resultClient.status == 201) {
+          const { data } = await resultClient.json();
+          console.log(data);
+          setMessages(data);
+          // setGraphData({
+          //   labels: messages.map((e) => e.date),
+          //   datasets: [
+          //     {
+          //       label: "Users Gained",
+          //       data: messages.map((e) => e.value),
+          //       borderColor: "#3B82F6",
+          //       backgroundColor: "#3B82F6",
+          //     },
+          //   ],
+          // });
+          console.log({
+            x: data.map((e) => e.date),
+            y: data.map((e) => e.value),
+            type: "scatter",
+            mode: "lines+markers",
+            marker: { color: "red" },
+          });
+          setGraphData({
+            x: data.map((e) => e.date),
+            y: data.map((e) => e.value),
+            type: "scatter",
+            mode: "lines+markers",
+            marker: { color: "red" },
+          });
+        }
       }
     }
   }
@@ -141,14 +226,14 @@ const Home = () => {
       body: JSON.stringify(data),
     });
     if (result.status == 200 || result.status == 201) {
-    const {client} = await result.json();
-    console.log(client);
-    setHasClient(true);
-        setHost(client.host);
-        setPort(client.port);
-        setClientId(client.clientId);
-    _client = client;
-    socket.emit("registerClient", client._id);
+      const { client } = await result.json();
+      console.log(client);
+      setHasClient(true);
+      setHost(client.host);
+      setPort(client.port);
+      setClientId(client.clientId);
+      _client = client;
+      socket.emit("registerClient", client._id);
     }
   }
 
@@ -170,9 +255,7 @@ const Home = () => {
   }
 
   return (
-    
     <section className="flex gap-0">
-     
       <div
         className={`bg-[#0E1D24] min-h-screen ${
           open ? "w-72" : "w-16"
@@ -526,6 +609,50 @@ const Home = () => {
                       ))}
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {hasLogin && hasClient && graphData.x ? (
+            <div className="flex flex-col w-full">
+              <h1 className="font-semibold text-3xl pb-4">testutm</h1>
+              <div className="h-min w-full border-solid border border-grey300 rounded-md px-10 py-3">
+                <div className="flex flex-row items-stretch w-full px-3 h-[300px]">
+                  {/* <LineChart chartData={userData} /> */}
+                  <Plot
+                    data={[
+                      {
+                        x: messages.map((e) => e.date),
+                        y: messages.map((e) => e.value),
+                        type: "scatter",
+                        mode: "lines+markers",
+                        marker: { color: "red" },
+                      },
+                    ]}
+                    layout={{
+                      xaxis: {
+                        type: "date",
+                        range: [
+                          () => {
+                            var time = new Date();
+
+                            var olderTime = time.setMinutes(
+                              time.getMinutes() - 1
+                            );
+                            return olderTime;
+                          },
+                          () => {
+                            var time = new Date();
+
+                            var futureTime = time.setMinutes(
+                              time.getMinutes() + 1
+                            );
+                            return olderTime;
+                          },
+                        ],
+                      },
+                    }}
+                  />
                 </div>
               </div>
             </div>
